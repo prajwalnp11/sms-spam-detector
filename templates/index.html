@@ -1,24 +1,492 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SMS Spam Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SMS Shield | Spam Detector</title>
+    <meta name="description"
+          content="Check SMS messages for spam using an AI-powered text classifier.">
+
+    <style>
+        :root {
+            --green: #168653;
+            --green-dark: #106b41;
+            --green-light: #e9f8ef;
+            --background: #f5f8f6;
+            --text: #17251d;
+            --muted: #647269;
+            --border: #e1e9e3;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Roboto, Arial, sans-serif;
+            color: var(--text);
+            background: var(--background);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-content {
+            max-width: 1080px;
+            margin: auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            font-weight: 750;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--green-light);
+            color: var(--green);
+            font-size: 21px;
+        }
+
+        .nav-label {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 52px 24px 32px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 34px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--green-light);
+            color: var(--green-dark);
+            padding: 8px 13px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 750;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 19px 0 12px;
+            font-size: clamp(32px, 5vw, 45px);
+            line-height: 1.15;
+            letter-spacing: -1.8px;
+        }
+
+        .hero p {
+            max-width: 580px;
+            margin: 0 auto;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 12px 35px rgba(27, 58, 39, 0.045);
+        }
+
+        .card-heading {
+            margin: 0 0 8px;
+            font-size: 20px;
+            letter-spacing: -0.4px;
+        }
+
+        .card-description {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0 0 22px;
+        }
+
+        label {
+            display: block;
+            font-weight: 650;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 155px;
+            resize: vertical;
+            border: 1px solid #d7e1d9;
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text);
+            background: #fcfdfc;
+            font: inherit;
+            font-size: 15px;
+            line-height: 1.6;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(22, 134, 83, 0.12);
+        }
+
+        textarea::placeholder {
+            color: #98a49b;
+        }
+
+        .input-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .examples {
+            margin-top: 24px;
+        }
+
+        .examples-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 11px;
+        }
+
+        .example-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .example-button {
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 9px 13px;
+            color: #34483a;
+            background: #fff;
+            font: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .example-button:hover {
+            background: var(--green-light);
+            border-color: #a7d9b8;
+            color: var(--green-dark);
+        }
+
+        .submit-button {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 24px;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 12px;
+            background: var(--green);
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .submit-button:hover {
+            background: var(--green-dark);
+            transform: translateY(-1px);
+        }
+
+        .submit-button:focus-visible,
+        .example-button:focus-visible {
+            outline: 3px solid #8bcba5;
+            outline-offset: 3px;
+        }
+
+        .result {
+            margin-top: 24px;
+            padding: 21px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: #fbfdfb;
+        }
+
+        .result.spam {
+            background: #fff7f6;
+            border-color: #f2d2cd;
+        }
+
+        .result.ham {
+            background: #f0faf3;
+            border-color: #c7e9d1;
+        }
+
+        .result-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-icon {
+            display: grid;
+            place-items: center;
+            width: 43px;
+            height: 43px;
+            border-radius: 12px;
+            background: white;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .result-title {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .result-status {
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .result-note {
+            margin: 15px 0 0;
+            color: #536258;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 28px 12px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 600px) {
+            .nav-content {
+                padding: 14px 18px;
+            }
+
+            .nav-label {
+                font-size: 11px;
+            }
+
+            .container {
+                padding: 35px 15px 20px;
+            }
+
+            .hero {
+                margin-bottom: 25px;
+            }
+
+            .hero p {
+                font-size: 14px;
+            }
+
+            .card {
+                padding: 20px 16px;
+                border-radius: 16px;
+            }
+
+            textarea {
+                min-height: 135px;
+            }
+
+            .example-list {
+                gap: 8px;
+            }
+
+            .example-button {
+                font-size: 11px;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <h1>SMS Spam Detector</h1>
-    <p>Enter an SMS message to check it.</p>
+    <header class="navbar">
+        <div class="nav-content">
+            <div class="brand">
+                <div class="brand-icon" aria-hidden="true">✓</div>
+                <span>SMS Shield</span>
+            </div>
+            <div class="nav-label">AI-Powered Message Checker</div>
+        </div>
+    </header>
 
-    <form method="POST">
-        <textarea name="message" rows="5" cols="45"
-                  placeholder="Enter your message here"
-                  required>{{ message }}</textarea>
-        <br><br>
-        <button type="submit">Check Message</button>
-    </form>
+    <main class="container">
+        <section class="hero">
+            <div class="eyebrow">
+                <span aria-hidden="true">●</span>
+                Smart Message Protection
+            </div>
 
-    {% if prediction %}
-        <h2>Prediction: {{ prediction }}</h2>
-    {% endif %}
+            <h1>Is your message <span style="color: #168653;">safe?</span></h1>
+
+            <p>
+                Check a text message for potential spam using your
+                machine-learning model. Paste a message below to get started.
+            </p>
+        </section>
+
+        <section class="card">
+            <h2 class="card-heading">Check a message</h2>
+            <p class="card-description">
+                Enter the SMS text you want to analyse. Your existing
+                classifier will evaluate the message.
+            </p>
+
+            <form method="POST" id="spam-form">
+                <label for="message">Your SMS message</label>
+
+                <textarea
+                    id="message"
+                    name="message"
+                    placeholder="Example: Congratulations! You have won a free prize..."
+                    required
+                    maxlength="10000"
+                >{{ message | default('', true) }}</textarea>
+
+                <div class="input-meta">
+                    <span>Paste or type your message</span>
+                    <span id="char-count">0 characters</span>
+                </div>
+
+                <div class="examples">
+                    <div class="examples-title">Try an example</div>
+
+                    <div class="example-list">
+                        <button class="example-button" type="button"
+                            data-message="Congratulations! You have won a free prize. Claim now!">
+                            🎁 Prize message
+                        </button>
+
+                        <button class="example-button" type="button"
+                            data-message="URGENT! You have won a cash reward. Click now to claim your free gift!">
+                            ⚠️ Suspicious offer
+                        </button>
+
+                        <button class="example-button" type="button"
+                            data-message="Hi, I will meet you at college tomorrow.">
+                            💬 Normal message
+                        </button>
+                    </div>
+                </div>
+
+                <button class="submit-button" type="submit">
+                    <span aria-hidden="true">⌕</span>
+                    Analyse Message
+                </button>
+            </form>
+
+            {% if prediction is defined and prediction is not none and prediction|string|trim != '' %}
+                {% set result_text = prediction|string|upper|trim %}
+                {% set is_spam = result_text == 'SPAM' or result_text == '1' %}
+
+                <section class="result {{ 'spam' if is_spam else 'ham' }}"
+                         aria-live="polite">
+                    <div class="result-heading">
+                        <div class="result-icon" aria-hidden="true">
+                            {{ '⚠️' if is_spam else '✓' }}
+                        </div>
+
+                        <div>
+                            <h3 class="result-title">
+                                {{ 'Potential Spam Detected' if is_spam else 'Not Classified as Spam' }}
+                            </h3>
+
+                            <div class="result-status">
+                                Prediction:
+                                <strong>{{ 'SPAM' if is_spam else 'NOT SPAM' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="result-note">
+                        {% if is_spam %}
+                            Treat this message with caution. Avoid clicking
+                            suspicious links or sharing personal information.
+                        {% else %}
+                            Your model did not classify this message as spam.
+                            Continue to use caution with unexpected links or requests.
+                        {% endif %}
+                    </p>
+                </section>
+            {% endif %}
+        </section>
+
+        <footer class="footer">
+            <div>SMS Shield · Machine Learning Project</div>
+            <div>Predictions are model estimates and may not always be correct.</div>
+        </footer>
+    </main>
+
+    <script>
+        const messageInput = document.getElementById("message");
+        const charCount = document.getElementById("char-count");
+        const form = document.getElementById("spam-form");
+
+        function updateCharacterCount() {
+            charCount.textContent =
+                `${messageInput.value.length} characters`;
+        }
+
+        messageInput.addEventListener("input", updateCharacterCount);
+
+        document.querySelectorAll(".example-button").forEach((button) => {
+            button.addEventListener("click", () => {
+                messageInput.value = button.dataset.message;
+                updateCharacterCount();
+                messageInput.focus();
+            });
+        });
+
+        form.addEventListener("submit", (event) => {
+            if (!messageInput.value.trim()) {
+                event.preventDefault();
+                messageInput.focus();
+            }
+        });
+
+        updateCharacterCount();
+    </script>
 </body>
 </html>
